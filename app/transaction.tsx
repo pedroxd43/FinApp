@@ -18,11 +18,13 @@ import { TransactionType } from '@/lib/types';
 import { formatDate } from '@/lib/format';
 import { CategoryIcon } from '@/components/CategoryIcon';
 import { DatePickerModal } from '@/components/DatePickerModal';
+import { useInterstitialAd } from '@/hooks/useInterstitialAd';
 
 export default function TransactionScreen() {
   const { id } = useLocalSearchParams<{ id?: string }>();
   const router = useRouter();
   const { colors } = useTheme();
+  const { showAd } = useInterstitialAd();
   const { transactions, categories, addTransaction, updateTransaction, deleteTransaction } = useData();
 
   const editingTx = useMemo(
@@ -40,7 +42,7 @@ export default function TransactionScreen() {
 
   const filteredCategories = categories.filter((c) => c.type === type);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const amt = parseFloat(amount);
     if (!amt || amt <= 0) {
       setError('Ingresa un monto válido');
@@ -62,6 +64,7 @@ export default function TransactionScreen() {
     } else {
       addTransaction(data);
     }
+    await showAd();
     router.back();
   };
 
