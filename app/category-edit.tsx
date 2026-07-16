@@ -15,13 +15,11 @@ import { useTheme } from '@/lib/theme';
 import { CATEGORY_COLORS, CATEGORY_ICONS } from '@/lib/constants';
 import { TransactionType } from '@/lib/types';
 import * as Lucide from 'lucide-react-native';
-import { useInterstitialAd } from '@/hooks/useInterstitialAd';
 
 export default function CategoryEditScreen() {
   const { id, type: typeParam } = useLocalSearchParams<{ id?: string; type?: string }>();
   const router = useRouter();
   const { colors } = useTheme();
-  const { showAd } = useInterstitialAd();
   const { categories, addCategory, updateCategory, deleteCategory, transactions } = useData();
 
   const editingCat = useMemo(() => categories.find((c) => c.id === id), [categories, id]);
@@ -34,7 +32,7 @@ export default function CategoryEditScreen() {
   const [icon, setIcon] = useState(editingCat?.icon || CATEGORY_ICONS[0]);
   const [error, setError] = useState<string | null>(null);
 
-  const handleSave = async () => {
+  const handleSave = () => {
     if (!name.trim()) {
       setError('Ingresa un nombre');
       return;
@@ -45,7 +43,6 @@ export default function CategoryEditScreen() {
     } else {
       addCategory(data);
     }
-    await showAd();
     router.back();
   };
 
