@@ -14,7 +14,7 @@ export interface Transaction {
   type: TransactionType;
   amount: number;
   categoryId: string;
-  date: string; // ISO string
+  date: string;
   note?: string;
 }
 

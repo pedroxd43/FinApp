@@ -1,22 +1,13 @@
 import React, { useState, useMemo } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import { ChartPie, TrendingUp, TrendingDown, Wallet } from 'lucide-react-native';
-import { useData } from '@/lib/storage';
-import { useTheme } from '@/lib/theme';
-import { PeriodType } from '@/lib/types';
-import {
-  formatCurrency,
-  getWeekRange,
-  getMonthRange,
-  getYearRange,
-  isDateInRange,
-  getMonthName,
-  getWeekdayLabel,
-  getMonthLabel,
-} from '@/lib/format';
-import { PeriodSelector } from '@/components/PeriodSelector';
-import { BarChart } from '@/components/BarChart';
-import { DonutChart } from '@/components/DonutChart';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from '../primitives';
+import { ChartPie, TrendingUp, TrendingDown, Wallet } from 'lucide-react';
+import { useData } from '../lib/storage';
+import { useTheme } from '../lib/theme';
+import { PeriodType } from '../lib/types';
+import { formatCurrency, getWeekRange, getMonthRange, getYearRange, isDateInRange, getMonthName, getWeekdayLabel, getMonthLabel } from '../lib/format';
+import { PeriodSelector } from '../components/PeriodSelector';
+import { BarChart } from '../components/BarChart';
+import { DonutChart } from '../components/DonutChart';
 
 type BreakdownType = 'expense' | 'income';
 
@@ -43,9 +34,7 @@ export default function StatsScreen() {
 
   const periodLabel = useMemo(() => {
     if (period === 'week') {
-      const start = range.start;
-      const end = range.end;
-      return `${start.toLocaleDateString('es-CO', { day: '2-digit', month: 'short' })} - ${end.toLocaleDateString('es-CO', { day: '2-digit', month: 'short' })}`;
+      return `${range.start.toLocaleDateString('es-CO', { day: '2-digit', month: 'short' })} - ${range.end.toLocaleDateString('es-CO', { day: '2-digit', month: 'short' })}`;
     }
     if (period === 'month') return getMonthName(new Date(refDate));
     return String(refDate.getFullYear());
@@ -57,12 +46,8 @@ export default function StatsScreen() {
   );
 
   const totals = useMemo(() => {
-    let income = 0;
-    let expense = 0;
-    periodTransactions.forEach((t) => {
-      if (t.type === 'income') income += t.amount;
-      else expense += t.amount;
-    });
+    let income = 0, expense = 0;
+    periodTransactions.forEach((t) => { t.type === 'income' ? (income += t.amount) : (expense += t.amount); });
     return { income, expense, balance: income - expense };
   }, [periodTransactions]);
 
@@ -90,8 +75,7 @@ export default function StatsScreen() {
         const startDay = b * bucketSize + 1;
         let income = 0, expense = 0;
         periodTransactions.forEach((t) => {
-          const td = new Date(t.date);
-          const dayNum = td.getDate();
+          const dayNum = new Date(t.date).getDate();
           if (dayNum >= startDay && dayNum < startDay + bucketSize) {
             t.type === 'income' ? (income += t.amount) : (expense += t.amount);
           }
@@ -115,22 +99,15 @@ export default function StatsScreen() {
 
   const categoryBreakdown = useMemo(() => {
     const map = new Map<string, number>();
-    periodTransactions
-      .filter((t) => t.type === breakdown)
-      .forEach((t) => {
-        map.set(t.categoryId, (map.get(t.categoryId) || 0) + t.amount);
-      });
-    const result = Array.from(map.entries())
+    periodTransactions.filter((t) => t.type === breakdown).forEach((t) => {
+      map.set(t.categoryId, (map.get(t.categoryId) || 0) + t.amount);
+    });
+    return Array.from(map.entries())
       .map(([catId, total]) => {
         const cat = getCategory(catId);
-        return {
-          label: cat?.name || 'Sin categoría',
-          color: cat?.color || colors.textTertiary,
-          total,
-        };
+        return { label: cat?.name || 'Sin categoría', color: cat?.color || colors.textTertiary, total };
       })
       .sort((a, b) => b.total - a.total);
-    return result;
   }, [periodTransactions, breakdown, getCategory, colors.textTertiary]);
 
   const disableNext = offset >= 0;
@@ -142,46 +119,24 @@ export default function StatsScreen() {
         <Text style={[styles.subtitle, { color: colors.textSecondary }]}>Analiza tus finanzas</Text>
       </View>
 
-      <PeriodSelector
-        period={period}
-        onPeriodChange={(p) => {
-          setPeriod(p);
-          setOffset(0);
-        }}
-        label={periodLabel}
-        onPrev={() => setOffset(offset - 1)}
-        onNext={() => !disableNext && setOffset(offset + 1)}
-        disableNext={disableNext}
-      />
+      <PeriodSelector period={period} onPeriodChange={(p) => { setPeriod(p); setOffset(0); }} label={periodLabel} onPrev={() => setOffset(offset - 1)} onNext={() => !disableNext && setOffset(offset + 1)} disableNext={disableNext} />
 
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <View style={styles.summaryRow}>
           <View style={[styles.summaryCard, { backgroundColor: colors.card }]}>
-            <View style={[styles.summaryIcon, { backgroundColor: colors.incomeLight }]}>
-              <TrendingUp size={18} color={colors.incomeDark} />
-            </View>
+            <View style={[styles.summaryIcon, { backgroundColor: colors.incomeLight }]}><TrendingUp size={18} color={colors.incomeDark} /></View>
             <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>Ingresos</Text>
-            <Text style={[styles.summaryAmount, { color: colors.incomeDark }]}>
-              {formatCurrency(totals.income)}
-            </Text>
+            <Text style={[styles.summaryAmount, { color: colors.incomeDark }]}>{formatCurrency(totals.income)}</Text>
           </View>
           <View style={[styles.summaryCard, { backgroundColor: colors.card }]}>
-            <View style={[styles.summaryIcon, { backgroundColor: colors.expenseLight }]}>
-              <TrendingDown size={18} color={colors.expenseDark} />
-            </View>
+            <View style={[styles.summaryIcon, { backgroundColor: colors.expenseLight }]}><TrendingDown size={18} color={colors.expenseDark} /></View>
             <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>Gastos</Text>
-            <Text style={[styles.summaryAmount, { color: colors.expenseDark }]}>
-              {formatCurrency(totals.expense)}
-            </Text>
+            <Text style={[styles.summaryAmount, { color: colors.expenseDark }]}>{formatCurrency(totals.expense)}</Text>
           </View>
           <View style={[styles.summaryCard, { backgroundColor: colors.card }]}>
-            <View style={[styles.summaryIcon, { backgroundColor: colors.primaryLight }]}>
-              <Wallet size={18} color={colors.primary} />
-            </View>
+            <View style={[styles.summaryIcon, { backgroundColor: colors.primaryLight }]}><Wallet size={18} color={colors.primary} /></View>
             <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>Balance</Text>
-            <Text style={[styles.summaryAmount, { color: totals.balance >= 0 ? colors.incomeDark : colors.expenseDark }]}>
-              {formatCurrency(totals.balance)}
-            </Text>
+            <Text style={[styles.summaryAmount, { color: totals.balance >= 0 ? colors.incomeDark : colors.expenseDark }]}>{formatCurrency(totals.balance)}</Text>
           </View>
         </View>
 
@@ -194,21 +149,11 @@ export default function StatsScreen() {
           <View style={styles.breakdownHeader}>
             <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>Desglose por categoría</Text>
             <View style={[styles.breakdownToggle, { backgroundColor: colors.bg }]}>
-              <TouchableOpacity
-                style={[styles.breakdownBtn, breakdown === 'expense' && { backgroundColor: colors.expense }]}
-                onPress={() => setBreakdown('expense')}
-              >
-                <Text style={[styles.breakdownBtnText, { color: colors.textSecondary }, breakdown === 'expense' && { color: '#fff', fontFamily: 'Poppins-SemiBold' }]}>
-                  Gastos
-                </Text>
+              <TouchableOpacity style={[styles.breakdownBtn, breakdown === 'expense' && { backgroundColor: colors.expense }]} onPress={() => setBreakdown('expense')}>
+                <Text style={[styles.breakdownBtnText, { color: colors.textSecondary }, breakdown === 'expense' && { color: '#fff', fontFamily: 'Poppins-SemiBold' }]}>Gastos</Text>
               </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.breakdownBtn, breakdown === 'income' && { backgroundColor: colors.income }]}
-                onPress={() => setBreakdown('income')}
-              >
-                <Text style={[styles.breakdownBtnText, { color: colors.textSecondary }, breakdown === 'income' && { color: '#fff', fontFamily: 'Poppins-SemiBold' }]}>
-                  Ingresos
-                </Text>
+              <TouchableOpacity style={[styles.breakdownBtn, breakdown === 'income' && { backgroundColor: colors.income }]} onPress={() => setBreakdown('income')}>
+                <Text style={[styles.breakdownBtnText, { color: colors.textSecondary }, breakdown === 'income' && { color: '#fff', fontFamily: 'Poppins-SemiBold' }]}>Ingresos</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -217,9 +162,7 @@ export default function StatsScreen() {
           ) : (
             <View style={styles.emptyChart}>
               <ChartPie size={40} color={colors.textTertiary} />
-              <Text style={[styles.emptyChartText, { color: colors.textTertiary }]}>
-                Sin datos de {breakdown === 'expense' ? 'gastos' : 'ingresos'} en este periodo
-              </Text>
+              <Text style={[styles.emptyChartText, { color: colors.textTertiary }]}>Sin datos de {breakdown === 'expense' ? 'gastos' : 'ingresos'} en este periodo</Text>
             </View>
           )}
         </View>
@@ -229,95 +172,23 @@ export default function StatsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  header: {
-    paddingHorizontal: 16,
-    paddingTop: 56,
-    paddingBottom: 8,
-  },
-  title: {
-    fontSize: 24,
-    fontFamily: 'Poppins-Bold',
-  },
-  subtitle: {
-    fontSize: 14,
-    fontFamily: 'Poppins-Regular',
-  },
-  scroll: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingBottom: 32,
-  },
-  summaryRow: {
-    flexDirection: 'row',
-    gap: 8,
-    paddingHorizontal: 16,
-    marginTop: 12,
-  },
-  summaryCard: {
-    flex: 1,
-    borderRadius: 14,
-    padding: 12,
-    alignItems: 'center',
-  },
-  summaryIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 6,
-  },
-  summaryLabel: {
-    fontSize: 11,
-    fontFamily: 'Poppins-Regular',
-  },
-  summaryAmount: {
-    fontSize: 14,
-    fontFamily: 'Poppins-SemiBold',
-    marginTop: 2,
-  },
-  card: {
-    borderRadius: 16,
-    padding: 16,
-    marginHorizontal: 16,
-    marginTop: 12,
-  },
-  cardTitle: {
-    fontSize: 16,
-    fontFamily: 'Poppins-SemiBold',
-    marginBottom: 12,
-  },
-  breakdownHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 12,
-  },
-  breakdownToggle: {
-    flexDirection: 'row',
-    borderRadius: 8,
-    padding: 2,
-  },
-  breakdownBtn: {
-    paddingVertical: 5,
-    paddingHorizontal: 12,
-    borderRadius: 6,
-  },
-  breakdownBtnText: {
-    fontSize: 12,
-    fontFamily: 'Poppins-Regular',
-  },
-  emptyChart: {
-    alignItems: 'center',
-    paddingVertical: 32,
-  },
-  emptyChartText: {
-    fontSize: 14,
-    fontFamily: 'Poppins-Regular',
-    marginTop: 8,
-  },
+  container: { flex: 1, display: 'flex', flexDirection: 'column' },
+  header: { paddingLeft: 16, paddingRight: 16, paddingTop: 56, paddingBottom: 8 },
+  title: { fontSize: 24, fontFamily: 'Poppins-Bold' },
+  subtitle: { fontSize: 14, fontFamily: 'Poppins-Regular' },
+  scroll: { flex: 1 },
+  scrollContent: { paddingBottom: 32 },
+  summaryRow: { flexDirection: 'row', gap: 8, paddingLeft: 16, paddingRight: 16, marginTop: 12 },
+  summaryCard: { flex: 1, borderRadius: 14, padding: 12, alignItems: 'center' },
+  summaryIcon: { width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center', marginBottom: 6, display: 'flex' },
+  summaryLabel: { fontSize: 11, fontFamily: 'Poppins-Regular' },
+  summaryAmount: { fontSize: 14, fontFamily: 'Poppins-SemiBold', marginTop: 2 },
+  card: { borderRadius: 16, padding: 16, marginLeft: 16, marginRight: 16, marginTop: 12 },
+  cardTitle: { fontSize: 16, fontFamily: 'Poppins-SemiBold', marginBottom: 12 },
+  breakdownHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 },
+  breakdownToggle: { flexDirection: 'row', borderRadius: 8, padding: 2 },
+  breakdownBtn: { paddingTop: 5, paddingBottom: 5, paddingLeft: 12, paddingRight: 12, borderRadius: 6 },
+  breakdownBtnText: { fontSize: 12, fontFamily: 'Poppins-Regular' },
+  emptyChart: { alignItems: 'center', paddingTop: 32, paddingBottom: 32 },
+  emptyChartText: { fontSize: 14, fontFamily: 'Poppins-Regular', marginTop: 8 },
 });

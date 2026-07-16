@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export type ThemeMode = 'light' | 'dark';
 
@@ -75,7 +74,7 @@ const DARK: ThemeColors = {
   tabInactive: '#64748B',
 };
 
-const THEME_KEY = '@finapp:theme';
+const THEME_KEY = 'finapp:theme';
 
 interface ThemeContextValue {
   mode: ThemeMode;
@@ -90,25 +89,23 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [mode, setMode] = useState<ThemeMode>('light');
 
   useEffect(() => {
-    (async () => {
-      const saved = await AsyncStorage.getItem(THEME_KEY);
-      if (saved === 'dark' || saved === 'light') {
-        setMode(saved);
-      }
-    })();
+    const saved = localStorage.getItem(THEME_KEY);
+    if (saved === 'dark' || saved === 'light') {
+      setMode(saved);
+    }
   }, []);
 
   const toggleTheme = useCallback(() => {
     setMode((prev) => {
       const next = prev === 'light' ? 'dark' : 'light';
-      AsyncStorage.setItem(THEME_KEY, next);
+      localStorage.setItem(THEME_KEY, next);
       return next;
     });
   }, []);
 
   const setTheme = useCallback((m: ThemeMode) => {
     setMode(m);
-    AsyncStorage.setItem(THEME_KEY, m);
+    localStorage.setItem(THEME_KEY, m);
   }, []);
 
   const colors = mode === 'dark' ? DARK : LIGHT;

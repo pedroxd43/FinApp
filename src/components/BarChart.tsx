@@ -1,6 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { useTheme } from '@/lib/theme';
+import { View, Text, StyleSheet } from '../primitives';
+import { useTheme } from '../lib/theme';
 
 interface BarChartProps {
   data: { label: string; income: number; expense: number }[];
@@ -20,12 +20,8 @@ export function BarChart({ data, height = 160 }: BarChartProps) {
           return (
             <View key={i} style={styles.barGroup}>
               <View style={styles.bars}>
-                <View
-                  style={[styles.bar, { height: Math.max(incomeH, 2), backgroundColor: colors.income }]}
-                />
-                <View
-                  style={[styles.bar, { height: Math.max(expenseH, 2), backgroundColor: colors.expense }]}
-                />
+                <View style={[styles.bar, { height: Math.max(incomeH, 2), backgroundColor: colors.income }]} />
+                <View style={[styles.bar, { height: Math.max(expenseH, 2), backgroundColor: colors.expense }]} />
               </View>
             </View>
           );
@@ -53,56 +49,15 @@ export function BarChart({ data, height = 160 }: BarChartProps) {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    paddingVertical: 8,
-  },
-  chartRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    justifyContent: 'space-around',
-  },
-  barGroup: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  bars: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    gap: 4,
-  },
-  bar: {
-    width: 10,
-    borderRadius: 4,
-  },
-  labelsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginTop: 8,
-  },
-  label: {
-    flex: 1,
-    textAlign: 'center',
-    fontSize: 10,
-    fontFamily: 'Poppins-Regular',
-  },
-  legend: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 20,
-    marginTop: 12,
-  },
-  legendItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  legendDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-  },
-  legendText: {
-    fontSize: 12,
-    fontFamily: 'Poppins-Regular',
-  },
+  container: { paddingTop: 8, paddingBottom: 8 },
+  chartRow: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-around' },
+  barGroup: { flex: 1, alignItems: 'center' },
+  bars: { flexDirection: 'row', alignItems: 'flex-end', gap: 4 },
+  bar: { width: 10, borderRadius: 4 },
+  labelsRow: { flexDirection: 'row', justifyContent: 'space-around', marginTop: 8 },
+  label: { flex: 1, textAlign: 'center', fontSize: 10, fontFamily: 'Poppins-Regular' },
+  legend: { flexDirection: 'row', justifyContent: 'center', gap: 20, marginTop: 12 },
+  legendItem: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  legendDot: { width: 10, height: 10, borderRadius: 5 },
+  legendText: { fontSize: 12, fontFamily: 'Poppins-Regular' },
 });

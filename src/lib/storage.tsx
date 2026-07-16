@@ -1,12 +1,11 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Category, Transaction } from './types';
 import { DEFAULT_CATEGORIES } from './constants';
 import { generateId } from './format';
 
-const TRANSACTIONS_KEY = '@finapp:transactions';
-const CATEGORIES_KEY = '@finapp:categories';
-const INIT_KEY = '@finapp:initialized';
+const TRANSACTIONS_KEY = 'finapp:transactions';
+const CATEGORIES_KEY = 'finapp:categories';
+const INIT_KEY = 'finapp:initialized';
 
 interface DataContextValue {
   transactions: Transaction[];
@@ -29,44 +28,32 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    (async () => {
-      try {
-        const initialized = await AsyncStorage.getItem(INIT_KEY);
-        if (!initialized) {
-          await AsyncStorage.setItem(CATEGORIES_KEY, JSON.stringify(DEFAULT_CATEGORIES));
-          await AsyncStorage.setItem(TRANSACTIONS_KEY, JSON.stringify([]));
-          await AsyncStorage.setItem(INIT_KEY, 'true');
-          setCategories(DEFAULT_CATEGORIES);
-          setTransactions([]);
-        } else {
-          const cats = await AsyncStorage.getItem(CATEGORIES_KEY);
-          const trans = await AsyncStorage.getItem(TRANSACTIONS_KEY);
-          setCategories(cats ? JSON.parse(cats) : DEFAULT_CATEGORIES);
-          setTransactions(trans ? JSON.parse(trans) : []);
-        }
-      } catch (e) {
+    try {
+      const initialized = localStorage.getItem(INIT_KEY);
+      if (!initialized) {
+        localStorage.setItem(CATEGORIES_KEY, JSON.stringify(DEFAULT_CATEGORIES));
+        localStorage.setItem(TRANSACTIONS_KEY, JSON.stringify([]));
+        localStorage.setItem(INIT_KEY, 'true');
         setCategories(DEFAULT_CATEGORIES);
-      } finally {
-        setLoading(false);
+        setTransactions([]);
+      } else {
+        const cats = localStorage.getItem(CATEGORIES_KEY);
+        const trans = localStorage.getItem(TRANSACTIONS_KEY);
+        setCategories(cats ? JSON.parse(cats) : DEFAULT_CATEGORIES);
+        setTransactions(trans ? JSON.parse(trans) : []);
       }
-    })();
-  }, []);
-
-  const persistTransactions = useCallback(async (next: Transaction[]) => {
-    setTransactions(next);
-    await AsyncStorage.setItem(TRANSACTIONS_KEY, JSON.stringify(next));
-  }, []);
-
-  const persistCategories = useCallback(async (next: Category[]) => {
-    setCategories(next);
-    await AsyncStorage.setItem(CATEGORIES_KEY, JSON.stringify(next));
+    } catch {
+      setCategories(DEFAULT_CATEGORIES);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   const addTransaction = useCallback((t: Omit<Transaction, 'id'>) => {
     const newT: Transaction = { ...t, id: generateId() };
     setTransactions((prev) => {
       const next = [newT, ...prev];
-      AsyncStorage.setItem(TRANSACTIONS_KEY, JSON.stringify(next));
+      localStorage.setItem(TRANSACTIONS_KEY, JSON.stringify(next));
       return next;
     });
   }, []);
@@ -74,7 +61,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   const updateTransaction = useCallback((id: string, t: Omit<Transaction, 'id'>) => {
     setTransactions((prev) => {
       const next = prev.map((x) => (x.id === id ? { ...t, id } : x));
-      AsyncStorage.setItem(TRANSACTIONS_KEY, JSON.stringify(next));
+      localStorage.setItem(TRANSACTIONS_KEY, JSON.stringify(next));
       return next;
     });
   }, []);
@@ -82,7 +69,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   const deleteTransaction = useCallback((id: string) => {
     setTransactions((prev) => {
       const next = prev.filter((x) => x.id !== id);
-      AsyncStorage.setItem(TRANSACTIONS_KEY, JSON.stringify(next));
+      localStorage.setItem(TRANSACTIONS_KEY, JSON.stringify(next));
       return next;
     });
   }, []);
@@ -91,7 +78,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     const newC: Category = { ...c, id: generateId(), isCustom: true };
     setCategories((prev) => {
       const next = [...prev, newC];
-      AsyncStorage.setItem(CATEGORIES_KEY, JSON.stringify(next));
+      localStorage.setItem(CATEGORIES_KEY, JSON.stringify(next));
       return next;
     });
   }, []);
@@ -99,7 +86,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   const updateCategory = useCallback((id: string, c: Omit<Category, 'id'>) => {
     setCategories((prev) => {
       const next = prev.map((x) => (x.id === id ? { ...c, id, isCustom: x.isCustom } : x));
-      AsyncStorage.setItem(CATEGORIES_KEY, JSON.stringify(next));
+      localStorage.setItem(CATEGORIES_KEY, JSON.stringify(next));
       return next;
     });
   }, []);
@@ -107,7 +94,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   const deleteCategory = useCallback((id: string) => {
     setCategories((prev) => {
       const next = prev.filter((x) => x.id !== id);
-      AsyncStorage.setItem(CATEGORIES_KEY, JSON.stringify(next));
+      localStorage.setItem(CATEGORIES_KEY, JSON.stringify(next));
       return next;
     });
   }, []);

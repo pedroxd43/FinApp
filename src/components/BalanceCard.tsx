@@ -1,7 +1,7 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { useTheme } from '@/lib/theme';
-import { formatCurrency } from '@/lib/format';
+import { View, Text, StyleSheet } from '../primitives';
+import { useTheme } from '../lib/theme';
+import { formatCurrency } from '../lib/format';
 
 interface BalanceCardProps {
   totalIncome: number;
@@ -42,7 +42,8 @@ const styles = StyleSheet.create({
   card: {
     borderRadius: 20,
     padding: 20,
-    marginHorizontal: 16,
+    marginLeft: 16,
+    marginRight: 16,
     marginTop: 12,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
@@ -75,11 +76,14 @@ const styles = StyleSheet.create({
   divider: {
     width: 1,
     height: 40,
-    marginHorizontal: 12,
+    marginLeft: 12,
+    marginRight: 12,
   },
   badge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
+    paddingLeft: 10,
+    paddingRight: 10,
+    paddingTop: 4,
+    paddingBottom: 4,
     borderRadius: 8,
     alignSelf: 'flex-start',
     marginBottom: 6,

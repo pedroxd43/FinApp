@@ -1,7 +1,6 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
-import * as Lucide from 'lucide-react-native';
-import { useTheme } from '@/lib/theme';
+import { View, StyleSheet } from '../primitives';
+import * as Lucide from 'lucide-react';
 
 interface CategoryIconProps {
   icon: string;
@@ -10,7 +9,6 @@ interface CategoryIconProps {
 }
 
 export function CategoryIcon({ icon, color, size = 24 }: CategoryIconProps) {
-  const { colors } = useTheme();
   const IconComp = (Lucide as any)[icon] || Lucide.Circle;
   const bg = color + '22';
   return (
@@ -21,8 +19,5 @@ export function CategoryIcon({ icon, color, size = 24 }: CategoryIconProps) {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+  container: { alignItems: 'center', justifyContent: 'center', display: 'flex', flexShrink: 0 },
 });
