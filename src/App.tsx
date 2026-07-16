@@ -79,9 +79,7 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     display: 'flex',
-    overflowY: 'auto',
-    overflowX: 'hidden',
-    minHeight: 0,
+    overflow: 'hidden',
   },
   tabBar: {
     flexDirection: 'row',

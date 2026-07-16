@@ -20,8 +20,7 @@ html, body {
   max-width: 480px;
   margin: 0 auto;
   position: relative;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: hidden;
 }
 
 button {
@@ -47,7 +46,6 @@ span {
 div {
   display: flex;
   flex-direction: column;
-  min-height: 0;
 }
 
 @keyframes fadeIn {
