@@ -7,6 +7,7 @@ import { useData } from '../lib/storage';
 import { useTheme } from '../lib/theme';
 import { CATEGORY_COLORS, CATEGORY_ICONS } from '../lib/constants';
 import { TransactionType } from '../lib/types';
+import { showInterstitialAd } from '../lib/admob';
 
 export default function CategoryEditScreen() {
   const [searchParams] = useSearchParams();
@@ -23,12 +24,15 @@ export default function CategoryEditScreen() {
   const [color, setColor] = useState(editingCat?.color || CATEGORY_COLORS[0]);
   const [icon, setIcon] = useState(editingCat?.icon || CATEGORY_ICONS[0]);
   const [error, setError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!name.trim()) { setError('Ingresa un nombre'); return; }
+    setSaving(true);
     const data = { name: name.trim(), type, color, icon };
     if (editingCat) updateCategory(editingCat.id, data);
     else addCategory(data);
+    await showInterstitialAd();
     navigate(-1);
   };
 
@@ -92,8 +96,8 @@ export default function CategoryEditScreen() {
       </ScrollView>
 
       <View style={[styles.footer, { backgroundColor: colors.bg }]}>
-        <TouchableOpacity style={[styles.saveBtn, { backgroundColor: colors.primary }]} onPress={handleSave}>
-          <Text style={styles.saveBtnText}>{editingCat ? 'Guardar cambios' : 'Crear categoría'}</Text>
+        <TouchableOpacity style={[styles.saveBtn, { backgroundColor: colors.primary }]} onPress={handleSave} disabled={saving}>
+          <Text style={styles.saveBtnText}>{saving ? 'Guardando...' : editingCat ? 'Guardar cambios' : 'Crear categoría'}</Text>
         </TouchableOpacity>
       </View>
     </View>

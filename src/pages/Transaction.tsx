@@ -8,6 +8,7 @@ import { TransactionType } from '../lib/types';
 import { formatDate } from '../lib/format';
 import { CategoryIcon } from '../components/CategoryIcon';
 import { DatePickerModal } from '../components/DatePickerModal';
+import { showInterstitialAd } from '../lib/admob';
 
 export default function TransactionScreen() {
   const [searchParams] = useSearchParams();
@@ -28,13 +29,17 @@ export default function TransactionScreen() {
 
   const filteredCategories = categories.filter((c) => c.type === type);
 
-  const handleSave = () => {
+  const [saving, setSaving] = useState(false);
+
+  const handleSave = async () => {
     const amt = parseFloat(amount);
     if (!amt || amt <= 0) { setError('Ingresa un monto válido'); return; }
     if (!categoryId) { setError('Selecciona una categoría'); return; }
+    setSaving(true);
     const data = { type, amount: amt, categoryId, date: date.toISOString(), note: note.trim() || undefined };
     if (editingTx) updateTransaction(editingTx.id, data);
     else addTransaction(data);
+    await showInterstitialAd();
     navigate('/');
   };
 
@@ -93,8 +98,8 @@ export default function TransactionScreen() {
         </ScrollView>
 
         <View style={[styles.footer, { backgroundColor: colors.bg }]}>
-          <TouchableOpacity style={[styles.saveBtn, { backgroundColor: colors.primary }]} onPress={handleSave}>
-            <Text style={styles.saveBtnText}>{editingTx ? 'Guardar cambios' : 'Agregar transacción'}</Text>
+          <TouchableOpacity style={[styles.saveBtn, { backgroundColor: colors.primary }]} onPress={handleSave} disabled={saving}>
+            <Text style={styles.saveBtnText}>{saving ? 'Guardando...' : editingTx ? 'Guardar cambios' : 'Agregar transacción'}</Text>
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
