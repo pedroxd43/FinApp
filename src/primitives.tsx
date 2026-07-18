@@ -188,10 +188,15 @@ interface ScrollViewProps {
 export const ScrollView = React.forwardRef<HTMLDivElement, ScrollViewProps>(
   ({ style, children, contentContainerStyle, showsVerticalScrollIndicator, ...rest }, ref) => {
     const s = flatten(style);
-    s.overflowY = 'auto';
+    // Native scroll for Android WebView: force overflow-y auto and a flex child that can grow.
+    (s as any).overflowY = 'auto !important';
     s.overflowX = 'hidden';
+    (s as any).WebkitOverflowScrolling = 'touch';
     if (showsVerticalScrollIndicator === false) s.scrollbarWidth = 'none';
     const cs = flatten(contentContainerStyle);
+    // Inner wrapper must not shrink so it can exceed the viewport and trigger scroll.
+    (cs as any).flexShrink = 0;
+    (cs as any).minHeight = '100%';
     return (
       <div ref={ref} style={s} {...rest}>
         <div style={cs}>{children}</div>
@@ -213,8 +218,11 @@ interface FlatListProps<T> {
 
 export function FlatList<T>({ data, keyExtractor, renderItem, ListEmptyComponent, contentContainerStyle, style, ...rest }: FlatListProps<T>) {
   const s = flatten(style);
-  s.overflowY = 'auto';
+  (s as any).overflowY = 'auto !important';
+  (s as any).WebkitOverflowScrolling = 'touch';
   const cs = flatten(contentContainerStyle);
+  (cs as any).flexShrink = 0;
+  (cs as any).minHeight = '100%';
   if (data.length === 0 && ListEmptyComponent) {
     return <div style={s} {...rest}><div style={cs}>{ListEmptyComponent}</div></div>;
   }
@@ -242,8 +250,11 @@ interface SectionListProps<T> {
 
 export function SectionList<T>({ sections, keyExtractor, renderItem, renderSectionHeader, ListEmptyComponent, contentContainerStyle, style, ...rest }: SectionListProps<T>) {
   const s = flatten(style);
-  s.overflowY = 'auto';
+  (s as any).overflowY = 'auto !important';
+  (s as any).WebkitOverflowScrolling = 'touch';
   const cs = flatten(contentContainerStyle);
+  (cs as any).flexShrink = 0;
+  (cs as any).minHeight = '100%';
   const totalItems = sections.reduce((sum, sec) => sum + sec.data.length, 0);
   if (totalItems === 0 && ListEmptyComponent) {
     return <div style={s} {...rest}><div style={cs}>{ListEmptyComponent}</div></div>;

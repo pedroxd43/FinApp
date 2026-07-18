@@ -57,3 +57,10 @@ div {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
+
+/* Force vertical scroll on scroll containers without altering layout/positions. */
+div[style*="overflow-y: auto !important"],
+div[style*="overflow-y:auto !important"] {
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch;
+}
